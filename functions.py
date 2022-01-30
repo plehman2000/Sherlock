@@ -10,8 +10,8 @@ import re
 
 nlp = spacy.load('en_core_web_lg')
 
-openai.organization = "org-xYSZAaZqytg7EQ0juDkS4z5D"
-openai.api_key = "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"
+openai.organization = "none"
+openai.api_key = "none"
 
 def get_ents(text):
     #show entities in text
