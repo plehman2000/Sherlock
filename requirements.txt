@@ -1,0 +1,6 @@
+openai
+youtube_transcript_api
+spacy
+flask
+python-Levenshtein
+fuzzywuzzy
