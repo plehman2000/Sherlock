@@ -1,4 +1,5 @@
 from fuzzywuzzy import process
+import re
 
 def getEntTsPairs(entities_from_transcript):
     """
@@ -49,3 +50,34 @@ def fuzzySearch(query, ent_ts_pairs, limit=-1):
     kw_rel_ts_sorted_dict[kw] = kw_rel_ts_list
     
     return kw_rel_ts_sorted_dict
+
+def getIDFromURL(youtube_url):
+    pattern = r'(?:https?:\/\/)?(?:[0-9A-Z-]+\.)?(?:youtube|youtu|youtube-nocookie)\.(?:com|be)\/(?:watch\?v=|watch\?.+&v=|embed\/|v\/|.+\?v=)?([^&=\n%\?]{11})'
+    result = re.findall(pattern, youtube_url, re.IGNORECASE)
+    
+    return result[0]
+
+def getURLFromQuery(query, vid_url):
+    
+    vid_id = getIDFromURL(vid_url)
+    base_ts_url = f"https://youtu.be/{vid_id}?t="
+    transcript = getTranscriptFromURL(vid_url)
+    entities_from_transcript = stampsToEnts(transcript)
+    
+    ent_ts_pairs = get_ent_ts_pairs(entities_from_transcript)
+    kw_rel_ts_sorted_dict = fuzzy_search(query, ent_ts_pairs)
+    
+    entity_tslink_dict = {}
+    for kw in kw_rel_ts_sorted_dict.keys():
+        for kw_rel_ts_list in kw_rel_ts_sorted_dict[kw]:
+            tslink_list = []
+            curr_entity = kw_rel_ts_list[0]
+            for ts in kw_rel_ts_list[2]:
+                tslink = base_ts_url + str(round(float(ts)))
+                tslink_list.append(tslink)
+            
+            # Add relevance to list
+            tslink_rel_list = [tslink_list, kw_rel_ts_list[1]]
+            entity_tslink_dict[curr_entity] = tslink_rel_list
+    
+    return entity_tslink_dict
